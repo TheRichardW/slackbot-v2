@@ -1,17 +1,11 @@
-import axios from "axios";
+
 // import fetch
 // const env = require("../util/enviroment");
+import { Request } from "express";
 import { Snack } from "../types/snack";
 import { SnackJson } from "../types/snackJson";
-// import {voorraadPayload} from "../types/voorraadPayload"
+import { SnackPayload } from "../types/snackPayload";
 
-// const slackToken = env.slack.slack_key;
-const slackToken = "kaas";
-const urlView = "https://slack.com/api/views.open";
-const urlMessage = "https://slack.com/api/chat.postMessage";
-
-// const channel = env.slack.lunch_id;
-const channel = "kaas";
 
 //Airfryer class with all function for /airfryer in slack
 export class Airfryer {
@@ -30,17 +24,19 @@ export class Airfryer {
     { key: "bam", name: "Bamischijf", icon: "bami_schijf" },
   ];
 
-  getVoorraad(payload) {
+  getVoorraad(payload: SnackPayload) {
     const values = payload.view.state.values;
     const formAnswers = Object.values(values);
     const messages: { snack: Snack; amount: number }[] = [];
 
     console.log(this.snacksArr);
     for (const snack of this.snacksArr) {
+      if (snack.key === undefined) throw "Snack key is undefined";
       const formAnswer = formAnswers.find(
         (fA) => Object.keys(fA)[0] === snack.key
       );
-      const amount = formAnswer[snack.key].value;
+      if (formAnswer === undefined) throw "No value in form for key:" + snack.key;
+      const amount = parseInt(formAnswer[snack.key].value);
       if (amount > 0) {
         messages.push({ snack, amount });
         // await this.sendMessage(snack, amount);
@@ -55,6 +51,8 @@ export class Airfryer {
     );
 
     if (
+      formAnswerTtlExt1 !== undefined &&
+      formAnswerExt1 !== undefined &&
       formAnswerTtlExt1["ttlext1"].value !== undefined &&
       formAnswerExt1["ext1"].value !== undefined &&
       parseInt(formAnswerExt1["ext1"].value) > 0
@@ -73,33 +71,23 @@ export class Airfryer {
     );
 
     if (
+      formAnswerTtlExt2 !== undefined &&
+      formAnswerExt2 !== undefined &&
       formAnswerTtlExt2["ttlext2"]?.value !== undefined &&
       formAnswerExt2["ext2"]?.value !== undefined &&
       parseInt(formAnswerExt2["ext2"]?.value) > 0
     ) {
       messages.push({
-        snack: { name: formAnswerTtlExt2["ttlext1"].value, icon: null },
-        amount: parseInt(formAnswerExt2["ext1"].value),
+        snack: { name: formAnswerTtlExt2["ttlext2"].value, icon: null },
+        amount: parseInt(formAnswerExt2["ext2"].value),
       });
     }
 
     return messages;
   }
 
-  async sendMessage(snack, amount) {
-    const icon = snack?.icon ? `:${snack.icon}: ` : "";
-    await axios.post(
-      urlMessage,
-      {
-        channel: channel,
-        text: `${icon}${snack.name} _(voorraad: ${amount})_`,
-      },
-      { headers: { authorization: `Bearer ${slackToken}` } }
-    );
-  }
-
-  async postAirfryerModal(req) {
-    const dialogJson = {
+  getAirfryerModal(req: Request) {
+    const modalJson = {
       trigger_id: req.body.trigger_id,
       view: {
         type: "modal",
@@ -187,13 +175,7 @@ export class Airfryer {
         ],
       },
     };
-
-    await axios.post(urlView, dialogJson, {
-      headers: {
-        authorization: `Bearer ${slackToken}`,
-        "content-type": "application/json",
-      },
-    });
+    return modalJson;
   }
 
   createSnacksJson() {

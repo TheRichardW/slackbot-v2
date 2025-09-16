@@ -1,11 +1,20 @@
+import axios from "axios";
 import express, { Application, Request, Response } from "express";
 import "dotenv/config";
 import { Airfryer } from "./helpers/airfryer";
+import { SnackPayload} from "./types/snackPayload";
 
 const app: Application = express();
-const PORT = process.env.port;
+app.use(express.json());
+app.use(express.urlencoded());
 
-const airfryer = new Airfryer;
+const PORT = process.env.port;
+const SLACKTOKEN = process.env.slackToken;
+
+const airfryer = new Airfryer();
+
+const urlMessage = "https://slack.com/api/chat.postMessage";
+const urlView = "https://slack.com/api/views.open";
 
 app.get("/", (req: Request, res: Response) => {
   res.send("Hoi Hoi");
@@ -17,7 +26,18 @@ app.listen(PORT, () => {
 
 app.post("/slack/airfryer", async (req: Request, res: Response) => {
   res.status(200).end();
-  airfryer.postAirfryerModal(req, res);
+  const airfryerModal = airfryer.getAirfryerModal(req);
+  await axios
+    .post(urlView, airfryerModal, {
+      headers: {
+        authorization: `Bearer ${SLACKTOKEN}`,
+        "content-type": "application/json",
+      },
+    })
+    .then((response) => console.log(response.data))
+    .catch((reason) => {
+      console.log(reason);
+    });
 });
 
 //Add new events to the switch
@@ -29,7 +49,7 @@ app.post("/slack/events", async (req: Request, res: Response) => {
     res.status(200).send({ challenge: challenge }).end();
   }
 
-  if (!event.hasOwnProperty("bot_id") || event.username == "Jumbo Mand") {
+  if (!("bot_id" in event) || event.username == "Jumbo Mand") {
     switch (event.type) {
       case "message":
         whatMessage(event);
@@ -44,7 +64,7 @@ app.post("/slack/events", async (req: Request, res: Response) => {
 
 //Add new interactions to the switch
 app.post("/slack/interactivity", async (req: Request, res: Response) => {
-  let payload = JSON.parse(req.body.payload);
+  const payload: SnackPayload = JSON.parse(req.body.payload);
 
   let type = payload.type;
   if (type == undefined) {
@@ -64,36 +84,39 @@ app.post("/slack/interactivity", async (req: Request, res: Response) => {
       res.status(200).end();
       if (payload.view.title.text == "Snacks voorraad") {
         const messages = airfryer.getVoorraad(payload);
-        for(const message of messages) {
-          await airfryer.sendMessage(message.snack, message.amount); // TODO: change this to general slack message with channelId
+        for (const message of messages) {
+          const icon = message.snack?.icon ? `:${message.snack.icon}: ` : "";
+          const text = `${icon}${message.snack.name} _(voorraad: ${message.amount})_`;
+          await sendMessage("U0314MUDEM8", text); // TODO: get channel id from env or miniSQL
         }
         return;
       }
-      res = await axios.post(
-        "https://slack.com/api/workflows.updateStep",
-        { workflow_step_edit_id: payload.workflow_step.workflow_step_edit_id },
-        {
-          headers: {
-            authorization: `Bearer ${slackToken}`,
-            "content-type": "application/json",
-          },
-        }
-      );
       break;
   }
 });
 
-function whatMessage(event) {
-  switch (event.text) {
-    case "{{/jumbomand}}":
-      jumbo.getMand("", "");
-    default:
-      jumbo.addToMand(event);
-  }
+// function whatMessage(event) {
+//   switch (event.text) {
+//     case "{{/jumbomand}}":
+//       jumbo.getMand("", "");
+//     default:
+//       jumbo.addToMand(event);
+//   }
+// }
+
+async function sendMessage(channel: string, text: string) {
+  await axios.post(
+    urlMessage,
+    {
+      channel: channel,
+      text: text,
+    },
+    { headers: { authorization: `Bearer ${SLACKTOKEN}` } }
+  );
 }
 
 async function sendWorkflow(payload, res: Response) {
-  workflowModalJson = {
+  const workflowModalJson = {
     trigger_id: payload.trigger_id,
     view: {
       blocks: [
@@ -124,8 +147,9 @@ async function sendWorkflow(payload, res: Response) {
 
   res = await axios.post(urlView, workflowModalJson, {
     headers: {
-      authorization: `Bearer ${slackToken}`,
+      authorization: `Bearer ${SLACKTOKEN}`,
       "content-type": "application/json",
     },
   });
+  return res;
 }

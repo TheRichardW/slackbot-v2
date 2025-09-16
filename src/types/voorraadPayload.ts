@@ -1,3 +1,3 @@
-export interface voorraadPayload {
+export interface VoorraadPayload {
     id: string
 }
