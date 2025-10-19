@@ -27,7 +27,6 @@ export class Airfryer {
     const formAnswers = Object.values(values);
     const messages: { snack: Snack; amount: number }[] = [];
 
-    console.log(this.snacksArr);
     for (const snack of this.snacksArr) {
       if (snack.key === undefined) throw "Snack key is undefined";
       const formAnswer = formAnswers.find(
