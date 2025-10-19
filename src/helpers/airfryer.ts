@@ -1,6 +1,4 @@
 
-// import fetch
-// const env = require("../util/enviroment");
 import { Request } from "express";
 import { Snack } from "../types/snack";
 import { SnackJson } from "../types/snackJson";
@@ -39,7 +37,6 @@ export class Airfryer {
       const amount = parseInt(formAnswer[snack.key].value);
       if (amount > 0) {
         messages.push({ snack, amount });
-        // await this.sendMessage(snack, amount);
       }
     }
 
