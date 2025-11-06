@@ -79,9 +79,8 @@ export function slackRoutes(app: Express, slack: SlackFunctions, airfryer: Airfr
         if (payload.view.title.text == "Snacks voorraad") {
           const messages = airfryer.getVoorraad(payload);
           for (const message of messages) {
-            const icon = message.snack?.icon ? `:${message.snack.icon}: ` : "";
-            const text = `${icon}${message.snack.name} _(voorraad: ${message.amount})_`;
-            await slack.sendMessage(LUNCH_CHANNEL, text); // TODO: get channel id from env or miniSQL
+            const text = `${message.snack.icon}${message.snack.name} _(voorraad: ${message.amount})_`;
+            await slack.sendMessage(LUNCH_CHANNEL, text);
           }
           return;
         }

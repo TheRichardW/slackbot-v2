@@ -12,14 +12,15 @@ export class Airfryer {
   }
 
   snacksArr: Snack[] = [
-    { key: "mex", name: "Mexicaantje", icon: "mexicano" },
-    { key: "fri", name: "Frikandel", icon: "frikandel" },
-    { key: "kro", name: "Kroket", icon: "kroket" },
-    { key: "kipc", name: "Kipcorn", icon: "kipcorn" },
-    { key: "kips", name: "Crispy chicken spicy", icon: "crispy_chick_spicy" },
-    { key: "kaa", name: "Kaassouflé", icon: "kaassoufle" },
-    { key: "cbi", name: "Chicken bites", icon: "chicken_bites" },
-    { key: "bam", name: "Bamischijf", icon: "bami_schijf" },
+    { key: "mex", name: "Mexicaantje", icon: ":mexicano:" },
+    { key: "fri", name: "Frikandel", icon: ":frikandel:" },
+    { key: "kro", name: "Kroket", icon: ":kroket:" },
+    { key: "kipc", name: "Kipcorn", icon: ":kipcorn:" },
+    { key: "kips", name: "Crispy chicken spicy", icon: ":crispy_chick_spicy:" },
+    { key: "kaa", name: "Kaassouflé", icon: ":kaassoufle:" },
+    { key: "cbi", name: "Chicken bites", icon: ":chicken_bites:" },
+    { key: "bam", name: "Bamischijf", icon: ":bami_schijf:" },
+    { key: "vkro", name: "Vega Kroket", icon: ":seedling::kroket:" },
   ];
 
   getVoorraad(payload: SnackPayload) {
@@ -54,7 +55,7 @@ export class Airfryer {
       parseInt(formAnswerExt1["ext1"].value) > 0
     ) {
       messages.push({
-        snack: { name: formAnswerTtlExt1["ttlext1"].value, icon: null },
+        snack: { name: formAnswerTtlExt1["ttlext1"].value, icon: "" },
         amount: parseInt(formAnswerExt1["ext1"].value),
       });
     }
@@ -74,7 +75,7 @@ export class Airfryer {
       parseInt(formAnswerExt2["ext2"]?.value) > 0
     ) {
       messages.push({
-        snack: { name: formAnswerTtlExt2["ttlext2"].value, icon: null },
+        snack: { name: formAnswerTtlExt2["ttlext2"].value, icon: "" },
         amount: parseInt(formAnswerExt2["ext2"].value),
       });
     }

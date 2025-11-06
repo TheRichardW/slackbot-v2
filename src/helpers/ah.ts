@@ -14,10 +14,7 @@ export class AH {
   constructor(tokenRepository: TokenRepository, slack: SlackFunctions) {
     this.tokenRepository = tokenRepository;
     this.slack = slack;
-  }
-
-  public initialize(): void {
-    console.log("AH initialized");
+    console.log("AH is active");
   }
 
   getMand() {
