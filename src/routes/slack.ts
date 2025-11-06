@@ -38,9 +38,12 @@ export function slackRoutes(app: Express, slack: SlackFunctions, airfryer: Airfr
         case "message": {
           if (event.channel == BOODSCHAP_CHANNEL) { // TODO change to env of db
             const messageParts = event.text.split(" ");
-            if (messageParts.length >= 2 && !isNaN(messageParts[1])) {
-              ah.addToBasket(messageParts[0], messageParts[1], event.channel, event.user);
+            const url = messageParts[0];
+            let quantity = parseInt(messageParts[1]);
+            if (isNaN(quantity)) {
+              quantity = 1;
             }
+            ah.addToBasket(url, quantity, event.channel, event.user);
             slack.sendEphemeralMessage(event.channel, event.user, 'Er is geen aantal ingevuld, het bericht moet er zo uit zien: "link nummer"');
           }
           res.status(200).end();

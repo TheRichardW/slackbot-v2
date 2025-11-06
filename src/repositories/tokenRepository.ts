@@ -86,4 +86,10 @@ export class TokenRepository {
     console.log("Token updated successfully.");
     return "token";
   }
+
+  deleteToken(service: string) {
+    const sql = `DELETE FROM token WHERE service = ?`;
+
+    this.db.prepare(sql).run(service);
+  }
 }

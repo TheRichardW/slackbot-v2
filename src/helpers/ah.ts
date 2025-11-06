@@ -35,7 +35,7 @@ export class AH {
       this.slack.sendEphemeralMessage(
         channel,
         user,
-        "Geen product gevonden, check de link die hebt gestuurd"
+        "Geen product gevonden, check de link die je hebt ingediend"
       );
       return;
     }
@@ -66,12 +66,12 @@ export class AH {
     this.slack.sendEphemeralMessage(
       channel,
       user,
-      "Jouw item(s) is toegevoegd aan het mandje"
+      "Jouw item(s) is/zijn toegevoegd aan het mandje"
     );
   }
 
   async checkExpires(token: Token): Promise<Token> {
-    if (token.expires_in + token.updated_at < Date.now()) {
+    if (((token.expires_in * 1000) + token.updated_at) < Date.now()) {
       const response = await axios.post(
         "https://api.ah.nl/mobile-auth/v1/auth/token/refresh",
         {
